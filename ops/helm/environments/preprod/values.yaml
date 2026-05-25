@@ -1,0 +1,42 @@
+# Preprod environment values for sie-otel-collector
+# Governor decision (S-002, issue 3, option i): preprod = 2 replicas (HA per ADR-001 D-1).
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  # Verified on Docker Hub by Ivy QA on 2026-05-25 (S-002 cycle 3).
+  # Bump procedure: see dev/values.yaml comment.
+  tag: "0.152.1"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+replicas: 2
+
+service:
+  name: sie-otel-collector
+  type: ClusterIP
+  port: 4317
+  annotations: {}
+
+# Collector config is loaded from ops/helm/conf/config.yaml via .Files.Get
+# (cycle-4 fix per PR #1 Governor review). To override per environment,
+# set `config: |` here with the full collector config; the template will
+# then prefer the inline value.
+config: ""
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

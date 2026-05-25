@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: {{ include "sie-otel-collector.fullname" . }}-config
+  labels:
+    {{- include "sie-otel-collector.labels" . | nindent 4 }}
+data:
+  config.yaml: |
+{{- if .Values.config }}
+{{ .Values.config | indent 4 }}
+{{- else }}
+{{ .Files.Get "conf/config.yaml" | indent 4 }}
+{{- end }}

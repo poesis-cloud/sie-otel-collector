@@ -1,0 +1,68 @@
+# NOTE: This workflow is dormant until the Azure OIDC secrets below are
+# provisioned in this repo's GitHub Actions settings. Triggering it via
+# workflow_dispatch before then will fail at the azure/login step. Once
+# all six secrets exist, the workflow becomes runnable as-is.
+# Secrets to provision (checklist):
+#   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
+#   AKS_RESOURCE_GROUP, AKS_CLUSTER_NAME
+
+name: sie-otel-collector-cd
+
+on:
+  workflow_dispatch:
+    inputs:
+      target:
+        description: "Deployment target"
+        required: true
+        type: choice
+        options:
+          - aks
+          - onprem
+      environment:
+        description: "Deployment environment"
+        required: true
+        type: choice
+        options:
+          - preprod
+          - prod
+
+permissions:
+  contents: read
+  packages: write
+  id-token: write
+
+jobs:
+  prod-deploy:
+    if: ${{ github.event.inputs.target == 'aks' }}
+    runs-on: ubuntu-latest
+    environment: ${{ github.event.inputs.environment }}
+    steps:
+      - uses: actions/checkout@v4
+      - name: Azure login (OIDC)
+        uses: azure/login@v2
+        with:
+          client-id: ${{ secrets.AZURE_CLIENT_ID }}
+          tenant-id: ${{ secrets.AZURE_TENANT_ID }}
+          subscription-id: ${{ secrets.AZURE_SUBSCRIPTION_ID }}
+      - name: Set AKS context
+        uses: azure/aks-set-context@v3
+        with:
+          resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
+          cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
+      - name: Deploy with Makefile
+        run: |
+          make prod-deploy \
+            DEPLOY_ENV=${{ github.event.inputs.environment }}
+
+  deploy-onprem:
+    if: ${{ github.event.inputs.target == 'onprem' }}
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+      - name: Package helm chart
+        run: make package-helm
+      - name: Upload helm package
+        uses: actions/upload-artifact@v4
+        with:
+          name: sie-otel-collector-helm-package
+          path: "*.tgz"

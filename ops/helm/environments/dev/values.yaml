@@ -1,0 +1,45 @@
+# Dev environment values for sie-otel-collector
+# Governor decision (S-002, issue 3, option i): dev = 1 replica.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  # Verified on Docker Hub by Ivy QA on 2026-05-25 (S-002 cycle 3).
+  # 0.115.0 was pinned at HUDDLE time but was never published to Docker Hub.
+  # Bump procedure: check https://github.com/open-telemetry/opentelemetry-collector-releases/releases
+  # then `docker pull otel/opentelemetry-collector-contrib:<tag>` to confirm.
+  tag: "0.152.1"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+replicas: 1
+
+service:
+  # name MUST be `sie-otel-collector` (ADR-001 D-1). Guard enforced in _helpers.tpl.
+  name: sie-otel-collector
+  type: ClusterIP
+  port: 4317
+  annotations: {}
+
+# Collector config is loaded from ops/helm/conf/config.yaml via .Files.Get
+# (cycle-4 fix per PR #1 Governor review). To override per environment,
+# set `config: |` here with the full collector config; the template will
+# then prefer the inline value.
+config: ""
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

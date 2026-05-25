@@ -1,0 +1,42 @@
+name: sie-otel-collector-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [dev, preprod, prod]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Helm lint (${{ matrix.env }})
+        run: |
+          helm lint ops/helm \
+            -f ops/helm/environments/${{ matrix.env }}/values.yaml
+      - name: Validate chart (${{ matrix.env }})
+        run: |
+          helm template test ops/helm \
+            -f ops/helm/environments/${{ matrix.env }}/values.yaml > rendered.yaml
+      - name: Assert ADR-001 D-1 Service contract (${{ matrix.env }})
+        # Discharges CRITIQUE cycle-1 #7: enforce Service name + port at CI time
+        # rather than via a template `fail` guard (which broke operator escape
+        # hatches). Parses every YAML doc, finds the Service, asserts name+port.
+        run: |
+          python3 - <<'PY'
+          import sys, yaml
+          docs = list(yaml.safe_load_all(open("rendered.yaml")))
+          services = [d for d in docs if d and d.get("kind") == "Service"]
+          assert len(services) == 1, f"expected exactly 1 Service, got {len(services)}"
+          svc = services[0]
+          name = svc["metadata"]["name"]
+          port = svc["spec"]["ports"][0]["port"]
+          assert name == "sie-otel-collector", f"ADR-001 D-1 violation: Service.metadata.name = {name!r}, want 'sie-otel-collector'"
+          assert port == 4317, f"ADR-001 D-1 violation: Service.spec.ports[0].port = {port!r}, want 4317"
+          print("ADR-001 D-1 Service contract OK")
+          PY

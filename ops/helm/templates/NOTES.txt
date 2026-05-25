@@ -1,0 +1,25 @@
+{{- if ne .Values.service.name "sie-otel-collector" -}}
+
+⚠️  WARNING (ADR-001 D-1 DNS contract): service.name is set to "{{ .Values.service.name }}".
+    The agreed in-cluster DNS for the shared SIE collector is
+    `sie-otel-collector.<namespace>.svc.cluster.local:4317`. Other SIE
+    components are configured against that exact name. Overriding it will
+    break trace/log delivery for any product expecting the default.
+
+    If this override is intentional (e.g. side-by-side blue/green install),
+    you must also reconfigure every producing component to point at the
+    new Service name.
+
+{{- else -}}
+sie-otel-collector installed in namespace "{{ .Release.Namespace }}".
+
+OTLP/gRPC endpoint:
+  sie-otel-collector.{{ .Release.Namespace }}.svc.cluster.local:4317
+
+Health check (in-cluster):
+  kubectl -n {{ .Release.Namespace }} port-forward svc/sie-otel-collector 13133:4317 >/dev/null &
+  # then visit http://localhost:13133/ on a pod with shell access.
+
+Smoke logs (cycle-1 debug exporter):
+  kubectl -n {{ .Release.Namespace }} logs deploy/{{ include "sie-otel-collector.fullname" . }} -f
+{{- end -}}
