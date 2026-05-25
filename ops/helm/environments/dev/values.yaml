@@ -6,10 +6,11 @@ fullnameOverride: ""
 
 image:
   repository: otel/opentelemetry-collector-contrib
-  # TODO(Ivy/Governor before merge): verify exact latest stable tag against
-  # https://github.com/open-telemetry/opentelemetry-collector-releases/releases
-  # Pinned at HUDDLE time (May 2026) to a known-good stable.
-  tag: "0.115.0"
+  # Verified on Docker Hub by Ivy QA on 2026-05-25 (S-002 cycle 3).
+  # 0.115.0 was pinned at HUDDLE time but was never published to Docker Hub.
+  # Bump procedure: check https://github.com/open-telemetry/opentelemetry-collector-releases/releases
+  # then `docker pull otel/opentelemetry-collector-contrib:<tag>` to confirm.
+  tag: "0.152.1"
   pullPolicy: IfNotPresent
 
 imagePullSecrets: []

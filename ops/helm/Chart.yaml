@@ -8,4 +8,4 @@ version: 0.1.0
 # appVersion pins the collector contrib image tag. Verify against
 # https://github.com/open-telemetry/opentelemetry-collector-releases/releases
 # before merging (TODO Ivy/Governor — see README).
-appVersion: "0.115.0"
+appVersion: "0.152.1"
