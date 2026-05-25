@@ -20,13 +20,8 @@ app.kubernetes.io/component: otel-collector
 {{- end -}}
 
 {{/*
-ADR-001 D-1 DNS contract guard: the in-cluster Service name MUST be
-`sie-otel-collector` so consumers can resolve
-`sie-otel-collector.<namespace>.svc.cluster.local:4317`. Fail render if
-the operator tries to override it.
+ADR-001 D-1 DNS contract is enforced as a warning (not a template `fail`)
+in `NOTES.txt` and as a CI grep check on the rendered Service in
+`.github/workflows/ci.yaml`. This preserves operator escape hatches
+(blue/green, sidecar tests) while still surfacing accidental overrides.
 */}}
-{{- define "sie-otel-collector.assertServiceName" -}}
-{{- if ne .Values.service.name "sie-otel-collector" -}}
-{{- fail (printf "service.name MUST be 'sie-otel-collector' (ADR-001 D-1 DNS contract); got %q" .Values.service.name) -}}
-{{- end -}}
-{{- end -}}
