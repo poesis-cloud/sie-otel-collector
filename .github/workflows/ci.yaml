@@ -1,0 +1,25 @@
+name: sie-otel-collector-ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+    branches: [main]
+
+jobs:
+  lint:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        env: [dev, preprod, prod]
+    steps:
+      - uses: actions/checkout@v4
+      - name: Helm lint (${{ matrix.env }})
+        run: |
+          helm lint ops/helm \
+            -f ops/helm/environments/${{ matrix.env }}/values.yaml
+      - name: Validate chart (${{ matrix.env }})
+        run: |
+          helm template test ops/helm \
+            -f ops/helm/environments/${{ matrix.env }}/values.yaml > /dev/null

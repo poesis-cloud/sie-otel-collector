@@ -1,0 +1,11 @@
+apiVersion: v2
+name: sie-otel-collector
+description: |
+  Shared OpenTelemetry Collector for SIE products (per ADR-001).
+  Cycle-1 scope: OTLP/gRPC receiver on 4317, single `debug` exporter to pod stdout.
+type: application
+version: 0.1.0
+# appVersion pins the collector contrib image tag. Verify against
+# https://github.com/open-telemetry/opentelemetry-collector-releases/releases
+# before merging (TODO Ivy/Governor — see README).
+appVersion: "0.115.0"

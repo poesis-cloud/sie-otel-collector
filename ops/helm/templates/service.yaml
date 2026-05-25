@@ -1,0 +1,23 @@
+{{- include "sie-otel-collector.assertServiceName" . -}}
+apiVersion: v1
+kind: Service
+metadata:
+  # ADR-001 D-1: Service name pinned to `sie-otel-collector` so consumers
+  # resolve `sie-otel-collector.<namespace>.svc.cluster.local:4317`.
+  name: {{ .Values.service.name }}
+  labels:
+    {{- include "sie-otel-collector.labels" . | nindent 4 }}
+  {{- with .Values.service.annotations }}
+  annotations:
+    {{- toYaml . | nindent 4 }}
+  {{- end }}
+spec:
+  type: {{ .Values.service.type }}
+  ports:
+    - name: otlp-grpc
+      port: {{ .Values.service.port }}
+      targetPort: otlp-grpc
+      protocol: TCP
+  selector:
+    app.kubernetes.io/name: {{ include "sie-otel-collector.name" . }}
+    app.kubernetes.io/instance: {{ .Release.Name }}

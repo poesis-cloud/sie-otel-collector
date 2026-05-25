@@ -1,0 +1,71 @@
+# Dev environment values for sie-otel-collector
+# Governor decision (S-002, issue 3, option i): dev = 1 replica.
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  # TODO(Ivy/Governor before merge): verify exact latest stable tag against
+  # https://github.com/open-telemetry/opentelemetry-collector-releases/releases
+  # Pinned at HUDDLE time (May 2026) to a known-good stable.
+  tag: "0.115.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+replicas: 1
+
+service:
+  # name MUST be `sie-otel-collector` (ADR-001 D-1). Guard enforced in _helpers.tpl.
+  name: sie-otel-collector
+  type: ClusterIP
+  port: 4317
+  annotations: {}
+
+# Embedded collector configuration; rendered into a ConfigMap and mounted at
+# /etc/otelcol-contrib/config.yaml. Cycle-1 scope per S-002:
+#  - one OTLP/gRPC receiver on 4317
+#  - one `debug` exporter to pod stdout (was `logging` before collector 0.86 —
+#    `debug` is canonical at appVersion 0.115.0).
+#  - service pipelines for traces and logs only (no metrics, no processors).
+#  - health_check extension on 13133 powers readiness/liveness probes.
+# ADR-001 D-2: no sampling — keep all.
+config: |
+  extensions:
+    health_check:
+      endpoint: 0.0.0.0:13133
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+  exporters:
+    debug:
+      verbosity: detailed
+  service:
+    extensions: [health_check]
+    pipelines:
+      traces:
+        receivers: [otlp]
+        exporters: [debug]
+      logs:
+        receivers: [otlp]
+        exporters: [debug]
+    telemetry:
+      logs:
+        level: info
+
+resources:
+  requests:
+    cpu: "50m"
+    memory: "128Mi"
+  limits:
+    cpu: "500m"
+    memory: "512Mi"
+
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

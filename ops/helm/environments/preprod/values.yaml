@@ -1,0 +1,59 @@
+# Preprod environment values for sie-otel-collector
+# Governor decision (S-002, issue 3, option i): preprod = 2 replicas (HA per ADR-001 D-1).
+
+nameOverride: ""
+fullnameOverride: ""
+
+image:
+  repository: otel/opentelemetry-collector-contrib
+  tag: "0.115.0"
+  pullPolicy: IfNotPresent
+
+imagePullSecrets: []
+
+replicas: 2
+
+service:
+  name: sie-otel-collector
+  type: ClusterIP
+  port: 4317
+  annotations: {}
+
+config: |
+  extensions:
+    health_check:
+      endpoint: 0.0.0.0:13133
+  receivers:
+    otlp:
+      protocols:
+        grpc:
+          endpoint: 0.0.0.0:4317
+  exporters:
+    debug:
+      verbosity: detailed
+  service:
+    extensions: [health_check]
+    pipelines:
+      traces:
+        receivers: [otlp]
+        exporters: [debug]
+      logs:
+        receivers: [otlp]
+        exporters: [debug]
+    telemetry:
+      logs:
+        level: info
+
+resources:
+  requests:
+    cpu: "100m"
+    memory: "256Mi"
+  limits:
+    cpu: "1000m"
+    memory: "1Gi"
+
+podSecurityContext: {}
+securityContext: {}
+nodeSelector: {}
+tolerations: []
+affinity: {}

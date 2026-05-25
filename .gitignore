@@ -1,0 +1,11 @@
+# Helm package artifacts
+*.tgz
+
+# Local env overrides (none expected cycle 1 — see Makefile)
+.env
+.env.dev
+
+# Editor / OS noise
+.DS_Store
+.idea/
+.vscode/
