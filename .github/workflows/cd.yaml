@@ -1,7 +1,8 @@
-# NOTE: This workflow is dormant until `sie/sie-otel-collector/` is split out
-# into its own GitHub repo `poesis-cloud/sie-otel-collector` (follow-up Story
-# per Governor decision 2026-05-25, S-002 HUDDLE issue 1, option b).
-# Required secrets (to provision when the repo is split out):
+# NOTE: This workflow is dormant until the Azure OIDC secrets below are
+# provisioned in this repo's GitHub Actions settings. Triggering it via
+# workflow_dispatch before then will fail at the azure/login step. Once
+# all six secrets exist, the workflow becomes runnable as-is.
+# Secrets to provision (checklist):
 #   AZURE_CLIENT_ID, AZURE_TENANT_ID, AZURE_SUBSCRIPTION_ID,
 #   AKS_RESOURCE_GROUP, AKS_CLUSTER_NAME
 
