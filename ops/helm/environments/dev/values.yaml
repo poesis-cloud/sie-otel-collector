@@ -24,38 +24,11 @@ service:
   port: 4317
   annotations: {}
 
-# Embedded collector configuration; rendered into a ConfigMap and mounted at
-# /etc/otelcol-contrib/config.yaml. Cycle-1 scope per S-002:
-#  - one OTLP/gRPC receiver on 4317
-#  - one `debug` exporter to pod stdout (was `logging` before collector 0.86 —
-#    `debug` is canonical at appVersion 0.115.0).
-#  - service pipelines for traces and logs only (no metrics, no processors).
-#  - health_check extension on 13133 powers readiness/liveness probes.
-# ADR-001 D-2: no sampling — keep all.
-config: |
-  extensions:
-    health_check:
-      endpoint: 0.0.0.0:13133
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: 0.0.0.0:4317
-  exporters:
-    debug:
-      verbosity: detailed
-  service:
-    extensions: [health_check]
-    pipelines:
-      traces:
-        receivers: [otlp]
-        exporters: [debug]
-      logs:
-        receivers: [otlp]
-        exporters: [debug]
-    telemetry:
-      logs:
-        level: info
+# Collector config is loaded from ops/helm/conf/config.yaml via .Files.Get
+# (cycle-4 fix per PR #1 Governor review). To override per environment,
+# set `config: |` here with the full collector config; the template will
+# then prefer the inline value.
+config: ""
 
 resources:
   requests:

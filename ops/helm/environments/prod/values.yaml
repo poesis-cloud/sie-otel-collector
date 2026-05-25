@@ -22,30 +22,11 @@ service:
   port: 4317
   annotations: {}
 
-config: |
-  extensions:
-    health_check:
-      endpoint: 0.0.0.0:13133
-  receivers:
-    otlp:
-      protocols:
-        grpc:
-          endpoint: 0.0.0.0:4317
-  exporters:
-    debug:
-      verbosity: detailed
-  service:
-    extensions: [health_check]
-    pipelines:
-      traces:
-        receivers: [otlp]
-        exporters: [debug]
-      logs:
-        receivers: [otlp]
-        exporters: [debug]
-    telemetry:
-      logs:
-        level: info
+# Collector config is loaded from ops/helm/conf/config.yaml via .Files.Get
+# (cycle-4 fix per PR #1 Governor review). To override per environment,
+# set `config: |` here with the full collector config; the template will
+# then prefer the inline value.
+config: ""
 
 resources:
   requests:
