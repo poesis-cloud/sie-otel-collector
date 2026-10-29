@@ -9,5 +9,5 @@ data:
 {{- if .Values.config }}
 {{ .Values.config | indent 4 }}
 {{- else }}
-{{ .Files.Get "conf/config.yaml" | indent 4 }}
+{{ tpl (.Files.Get "conf/config.yaml") . | indent 4 }}
 {{- end }}

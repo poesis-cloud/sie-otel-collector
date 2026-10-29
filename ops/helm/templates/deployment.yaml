@@ -51,6 +51,25 @@ spec:
               port: health
             initialDelaySeconds: 5
             periodSeconds: 10
+          {{- if or .Values.sink.otlp.enabled .Values.extraEnv }}
+          env:
+            {{- if .Values.sink.otlp.enabled }}
+            - name: SIE_OTLP_BACKEND_ENDPOINT
+              value: {{ required "sink.otlp.endpoint is required when sink.otlp.enabled=true" .Values.sink.otlp.endpoint | quote }}
+            - name: SIE_OTLP_BACKEND_INSECURE
+              value: {{ .Values.sink.otlp.insecure | quote }}
+            {{- with .Values.sink.otlp.authorization.existingSecret }}
+            - name: SIE_OTLP_BACKEND_AUTHORIZATION
+              valueFrom:
+                secretKeyRef:
+                  name: {{ . }}
+                  key: {{ $.Values.sink.otlp.authorization.key }}
+            {{- end }}
+            {{- end }}
+            {{- with .Values.extraEnv }}
+            {{- toYaml . | nindent 12 }}
+            {{- end }}
+          {{- end }}
           volumeMounts:
             - name: config
               mountPath: /etc/otelcol-contrib
