@@ -18,7 +18,7 @@ ENV_FILE ?= $(CHART)/environments/$(DEPLOY_ENV)/values.yaml
 OTLP_BACKEND_ENDPOINT ?=
 OTLP_BACKEND_AUTH_SECRET ?=
 HELM_SINK_ARGS := $(if $(OTLP_BACKEND_ENDPOINT),--set sink.otlp.enabled=true --set-string sink.otlp.endpoint=$(OTLP_BACKEND_ENDPOINT)) \
-	$(if $(OTLP_BACKEND_AUTH_SECRET),--set sink.otlp.authorization.existingSecret=$(OTLP_BACKEND_AUTH_SECRET))
+	$(if $(OTLP_BACKEND_AUTH_SECRET),--set-string sink.otlp.authorization.existingSecret=$(OTLP_BACKEND_AUTH_SECRET))
 
 dev-check:
 	@command -v kubectl >/dev/null 2>&1 || { echo "Missing required command: kubectl"; exit 1; }
