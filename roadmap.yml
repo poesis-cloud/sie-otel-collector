@@ -1,0 +1,5 @@
+scope: product
+name: OTel Collector
+milestones:
+  - version: v1.0.0
+    current: true
