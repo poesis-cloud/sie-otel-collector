@@ -13,6 +13,13 @@ RELEASE ?= sie-otel-collector
 CHART ?= ops/helm
 ENV_FILE ?= $(CHART)/environments/$(DEPLOY_ENV)/values.yaml
 
+# Optional OTLP backend, injected by CI/CD (GitHub environment variable).
+# Empty => the collector keeps the debug sink only.
+OTLP_BACKEND_ENDPOINT ?=
+OTLP_BACKEND_AUTH_SECRET ?=
+HELM_SINK_ARGS := $(if $(OTLP_BACKEND_ENDPOINT),--set sink.otlp.enabled=true --set-string sink.otlp.endpoint=$(OTLP_BACKEND_ENDPOINT)) \
+	$(if $(OTLP_BACKEND_AUTH_SECRET),--set-string sink.otlp.authorization.existingSecret=$(OTLP_BACKEND_AUTH_SECRET))
+
 dev-check:
 	@command -v kubectl >/dev/null 2>&1 || { echo "Missing required command: kubectl"; exit 1; }
 	@command -v helm >/dev/null 2>&1 || { echo "Missing required command: helm"; exit 1; }
@@ -45,7 +52,7 @@ dev-down:
 prod-deploy:
 	@$(MAKE) deploy-check
 	helm upgrade --install $(RELEASE) $(CHART) -n $(NAMESPACE) --create-namespace --wait --timeout 10m0s \
-		-f $(ENV_FILE)
+		-f $(ENV_FILE) $(HELM_SINK_ARGS)
 
 package-helm:
 	@command -v helm >/dev/null 2>&1 || { echo "Missing required command: helm"; exit 1; }

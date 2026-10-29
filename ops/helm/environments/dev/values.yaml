@@ -30,6 +30,27 @@ service:
 # then prefer the inline value.
 config: ""
 
+# Sink: where the collector forwards traces and logs.
+# - debug: pod stdout (default, no backend needed).
+# - otlp: one OTLP/gRPC backend, configured through environment variables
+#   injected by the deployment (CI/CD: `--set sink.otlp.endpoint=...`):
+#     SIE_OTLP_BACKEND_ENDPOINT, SIE_OTLP_BACKEND_INSECURE,
+#     SIE_OTLP_BACKEND_AUTHORIZATION (from an existing Secret, optional).
+sink:
+  debug:
+    enabled: true
+    verbosity: detailed
+  otlp:
+    enabled: false
+    endpoint: ""
+    insecure: false
+    authorization:
+      existingSecret: ""
+      key: authorization
+
+# Extra container environment variables (list of Kubernetes EnvVar).
+extraEnv: []
+
 resources:
   requests:
     cpu: "50m"

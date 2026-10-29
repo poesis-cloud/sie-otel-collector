@@ -50,6 +50,10 @@ jobs:
           resource-group: ${{ secrets.AKS_RESOURCE_GROUP }}
           cluster-name: ${{ secrets.AKS_CLUSTER_NAME }}
       - name: Deploy with Makefile
+        env:
+          # Optional, set in the GitHub environment (preprod / prod).
+          OTLP_BACKEND_ENDPOINT: ${{ vars.SIE_OTLP_BACKEND_ENDPOINT }}
+          OTLP_BACKEND_AUTH_SECRET: ${{ vars.SIE_OTLP_BACKEND_AUTH_SECRET }}
         run: |
           make prod-deploy \
             DEPLOY_ENV=${{ github.event.inputs.environment }}

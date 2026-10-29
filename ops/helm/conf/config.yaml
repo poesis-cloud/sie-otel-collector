@@ -1,3 +1,5 @@
+# Rendered by Helm (tpl) into the collector config. Sink selection and the OTLP
+# backend are driven by values / environment variables, see README "Sink".
 extensions:
   health_check:
     endpoint: 0.0.0.0:13133
@@ -7,17 +9,33 @@ receivers:
       grpc:
         endpoint: 0.0.0.0:4317
 exporters:
+{{- if .Values.sink.debug.enabled }}
   debug:
-    verbosity: detailed
+    verbosity: {{ .Values.sink.debug.verbosity }}
+{{- end }}
+{{- if .Values.sink.otlp.enabled }}
+  otlp:
+    endpoint: ${env:SIE_OTLP_BACKEND_ENDPOINT}
+    tls:
+      insecure: ${env:SIE_OTLP_BACKEND_INSECURE}
+{{- if .Values.sink.otlp.authorization.existingSecret }}
+    headers:
+      Authorization: ${env:SIE_OTLP_BACKEND_AUTHORIZATION}
+{{- end }}
+{{- end }}
 service:
   extensions: [health_check]
   pipelines:
+{{- $exporters := list }}
+{{- if .Values.sink.debug.enabled }}{{ $exporters = append $exporters "debug" }}{{ end }}
+{{- if .Values.sink.otlp.enabled }}{{ $exporters = append $exporters "otlp" }}{{ end }}
+{{- if not $exporters }}{{ fail "at least one sink must be enabled: sink.debug.enabled or sink.otlp.enabled" }}{{ end }}
     traces:
       receivers: [otlp]
-      exporters: [debug]
+      exporters: {{ $exporters | toJson }}
     logs:
       receivers: [otlp]
-      exporters: [debug]
+      exporters: {{ $exporters | toJson }}
   telemetry:
     logs:
       level: info
