@@ -62,8 +62,8 @@ spec:
             - name: SIE_OTLP_BACKEND_AUTHORIZATION
               valueFrom:
                 secretKeyRef:
-                  name: {{ . }}
-                  key: {{ $.Values.sink.otlp.authorization.key }}
+                  name: {{ . | quote }}
+                  key: {{ $.Values.sink.otlp.authorization.key | quote }}
             {{- end }}
             {{- end }}
             {{- with .Values.extraEnv }}
