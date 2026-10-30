@@ -87,3 +87,10 @@ and bump the pin if a newer stable exists. Avoid `latest`.
 The Service name must stay `sie-otel-collector` on port `4317` (ADR-001 D-1).
 This is enforced by CI (`ci.yaml`, "Assert ADR-001 D-1 Service contract") and a
 warning in `NOTES.txt`, not by a template guard.
+
+<!-- roadmap:start -->
+## Roadmap
+
+![Roadmap](docs/roadmap.svg)
+
+<!-- roadmap:end -->
