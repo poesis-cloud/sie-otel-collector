@@ -2,7 +2,7 @@
 
 Shared OpenTelemetry Collector for SIE products.
 
-**Binding ADR:** [ADR-001 — OpenTelemetry collector and conventions](../../products/sie-definition/architecture/adr-001-otel-collector-and-conventions.md)
+**Binding ADR:** [ADR-001 — OpenTelemetry collector and conventions](https://github.com/poesis-cloud/sie-definition-manager/blob/main/def/adr/adr-001-otel-collector-and-conventions.md)
 
 ## Purpose
 
