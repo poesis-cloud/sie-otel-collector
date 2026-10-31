@@ -1,4 +1,4 @@
-# sie-otel-collector
+# SIE OTel Collector
 
 Shared OpenTelemetry Collector for SIE products.
 
